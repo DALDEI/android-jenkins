@@ -56,6 +56,7 @@ def call(body) { // evaluate the body block, and collect configuration into the 
 
                             sh "./gradlew ${buildTask}"
                             if (publish) {
+                                sh "./gradlew -Pnightly=CI tagNightly" 
                                 sh "./gradlew -PartifactoryURL=${artifactoryURL} ${publishTask}"
                             }
                         }
@@ -67,7 +68,7 @@ def call(body) { // evaluate the body block, and collect configuration into the 
 
         post {
             success {
-                archiveArtifacts artifacts: "**/build/outputs/apk/${target}/*.apk, **/build/outputs/aar/*.aar, **/build/reports/lint-results.html", fingerprint: true, allowEmptyArchive: true, onlyIfSuccessful: true
+                archiveArtifacts artifacts: "**/build/outputs/apk/${target}/*.apk, **/build/version.properties, **/build/outputs/aar/*.aar, **/build/reports/lint-results.html", fingerprint: true, allowEmptyArchive: true, onlyIfSuccessful: true
             }
         }
     }
