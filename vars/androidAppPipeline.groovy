@@ -53,10 +53,12 @@ def call(body) { // evaluate the body block, and collect configuration into the 
                     dir(projectDir) {
                         script {
                             //current tag
+                            if (publish) {
+                                sh "./gradlew -Pnightly=CI tagNightly" 
+                            }
 
                             sh "./gradlew ${buildTask}"
                             if (publish) {
-                                sh "./gradlew -Pnightly=CI tagNightly" 
                                 sh "./gradlew -PartifactoryURL=${artifactoryURL} ${publishTask}"
                             }
                         }
