@@ -13,6 +13,7 @@ dy) { // evaluate the body block, and collect configuration into the object
     def publishTask = pipelineParams['publishTask'] ?: 'publishRelease'
     def artifactoryRepo = pipelineParams['artifactoryRepo'] ?: 'gradle-dev-local'
     def buildTask = pipelineParams['buildTask'] ?: defaultTask
+    def mavenLocal = pipelineParams['mavenLocal'] ?: ""
  
     def notifySlack(pass, branch, message = null) {
             withCredentials([string(credentialsId: 'jenkins-ci-slack-token-android-20180925-1', variable: 'SLACK_TOKEN')]) {
