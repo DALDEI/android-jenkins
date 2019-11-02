@@ -1,3 +1,13 @@
+def notifySlack(pass, branch, message = null) {
+          withCredentials([string(credentialsId: 'jenkins-ci-slack-token-android-20180925-1', variable: 'SLACK_TOKEN')]) {
+    def slackColor = pass ? 'good' : 'danger'
+    def slackMessage = "Nightly [${branch}] Build ${env.BUILD_URL}"
+    if (message != null) {
+        slackMessage += " - ${message}"
+    }
+    slackSend channel: '#jenkins-nightly-build', color: "${slackColor}", message: "${slackMessage}", teamDomain: 'outcomehealth', token: "${env.SLACK_TOKEN}"
+  }	
+}   
 
 def call(body) { // evaluate the body block, and collect configuration into the object
     def pipelineParams = [:]
@@ -15,16 +25,6 @@ def call(body) { // evaluate the body block, and collect configuration into the 
     def buildTask = pipelineParams['buildTask'] ?: defaultTask
     def mavenLocal = pipelineParams['mavenLocal'] ?: ""
  
-    def notifySlack(pass, branch, message = null) {
-            withCredentials([string(credentialsId: 'jenkins-ci-slack-token-android-20180925-1', variable: 'SLACK_TOKEN')]) {
-      def slackColor = pass ? 'good' : 'danger'
-      def slackMessage = "Nightly [${branch}] Build ${env.BUILD_URL}"
-      if (message != null) {
-          slackMessage += " - ${message}"
-      }
-      slackSend channel: '#jenkins-nightly-build', color: "${slackColor}", message: "${slackMessage}", teamDomain: 'outcomehealth', token: "${env.SLACK_TOKEN}"
-    }	
-  }   
 
   def publish = pipelineParams['publish'] ?: false
     pipeline {
