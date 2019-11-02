@@ -1,4 +1,5 @@
-def call(body) { // evaluate the body block, and collect configuration into the object
+
+dy) { // evaluate the body block, and collect configuration into the object
     def pipelineParams = [:]
     body.resolveStrategy = Closure.DELEGATE_FIRST
     body.delegate = pipelineParams
@@ -12,7 +13,19 @@ def call(body) { // evaluate the body block, and collect configuration into the 
     def publishTask = pipelineParams['publishTask'] ?: 'publishRelease'
     def artifactoryRepo = pipelineParams['artifactoryRepo'] ?: 'gradle-dev-local'
     def buildTask = pipelineParams['buildTask'] ?: defaultTask
-    def publish = pipelineParams['publish'] ?: false
+ 
+    def notifySlack(pass, branch, message = null) {
+            withCredentials([string(credentialsId: 'jenkins-ci-slack-token-android-20180925-1', variable: 'SLACK_TOKEN')]) {
+      def slackColor = pass ? 'good' : 'danger'
+      def slackMessage = "Nightly [${branch}] Build ${env.BUILD_URL}"
+      if (message != null) {
+          slackMessage += " - ${message}"
+      }
+      slackSend channel: '#jenkins-nightly-build', color: "${slackColor}", message: "${slackMessage}", teamDomain: 'outcomehealth', token: "${env.SLACK_TOKEN}"
+    }	
+  }   
+
+  def publish = pipelineParams['publish'] ?: false
     pipeline {
         // our complete declarative pipeline can go in here
 
@@ -73,8 +86,11 @@ def call(body) { // evaluate the body block, and collect configuration into the 
         post {
             success {
                 archiveArtifacts artifacts: "**/build/outputs/apk/${target}/*.apk, **/build/version.properties, **/build/outputs/aar/*.aar, **/build/reports/lint-results.html", fingerprint: true, allowEmptyArchive: true, onlyIfSuccessful: true
+            notifySlack(true,env.BRANCH_NAME, "Completed TEST CI Installer build")
             }
+
         }
     }
 }
+
 
